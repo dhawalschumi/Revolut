@@ -4,16 +4,13 @@
 package com.revolut.account.service;
 
 import com.revolut.transfers.account.Account;
-import com.revolut.transfers.customer.Customer;
 
 /**
- * @author dhawp
+ * @author Dhawal Patel
  *
  */
 public interface AccountService {
 
-	public Account getAccountByCustomerId(final String customerId);
-
-	public Customer getCustomerByAccountId(final long accountId);
+	public Account getAccountByCustomerId(final long customerId) throws Exception;
 
 }

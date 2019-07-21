@@ -9,13 +9,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * @author dhawp
+ * @author Dhawal Patel
  *
  */
 @AllArgsConstructor
 @Data
 public class Balance {
 
-	private final BigDecimal accountBalance;
+	private final BigDecimal amount;
+
+	private final long version;
 
 }
