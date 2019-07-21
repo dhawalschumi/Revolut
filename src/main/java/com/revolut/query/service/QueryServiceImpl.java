@@ -119,17 +119,15 @@ public class QueryServiceImpl implements QueryService {
 
 	private PreparedStatement getTransferPreparedStatement(final Account fromAccount, final Account toAccount,
 			final BigDecimal amount, Connection connection) throws SQLException {
-		PreparedStatement statement = connection
-				.prepareStatement("update balance set amount = ? , version = ? where account_id = ? and version = ?");
+		PreparedStatement statement = connection.prepareStatement(
+				"update balance set amount = ? , version = version + 1  where account_id = ? and version = ?");
 		statement.setBigDecimal(1, fromAccount.getAccountBalance().getAmount().subtract(amount));
-		statement.setLong(2, fromAccount.getAccountBalance().getVersion() + 1);
-		statement.setLong(3, fromAccount.getAccountId());
-		statement.setLong(4, fromAccount.getAccountBalance().getVersion());
+		statement.setLong(2, fromAccount.getAccountId());
+		statement.setLong(3, fromAccount.getAccountBalance().getVersion());
 		statement.addBatch();
 		statement.setBigDecimal(1, toAccount.getAccountBalance().getAmount().add(amount));
-		statement.setLong(2, toAccount.getAccountBalance().getVersion() + 1);
-		statement.setLong(3, toAccount.getAccountId());
-		statement.setLong(4, toAccount.getAccountBalance().getVersion());
+		statement.setLong(2, toAccount.getAccountId());
+		statement.setLong(3, toAccount.getAccountBalance().getVersion());
 		statement.addBatch();
 		return statement;
 	}

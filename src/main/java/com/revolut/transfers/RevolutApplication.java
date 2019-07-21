@@ -8,6 +8,7 @@ import com.revolut.account.service.AccountService;
 import com.revolut.account.service.AccountServiceImpl;
 import com.revolut.balance.service.BalanceService;
 import com.revolut.balance.service.BalanceServiceImpl;
+import com.revolut.handlers.AccountDetailsHandler;
 import com.revolut.handlers.TransfersHandler;
 import com.revolut.query.service.QueryService;
 import com.revolut.query.service.QueryServiceImpl;
@@ -45,8 +46,10 @@ public class RevolutApplication {
 				registry.add(TransferService.class, new TransferServiceImpl(balanceService, accountService));
 				registry.add(ObjectMapper.class, mapper);
 				registry.add(TransfersHandler.class, new TransfersHandler());
+				registry.add(AccountDetailsHandler.class, new AccountDetailsHandler(accountService));
 				registry.add(DatabaseManager.class, databaseManager);
-			}).handlers(chain -> chain.post("transfer", TransfersHandler.class));
+			}).handlers(chain -> chain.post("transfer", TransfersHandler.class).post("accountDetails",
+					AccountDetailsHandler.class));
 		};
 		try {
 			RatpackServer.start(serverSpec);

@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.springframework.util.CollectionUtils;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author Dhawal Patel
@@ -14,11 +16,13 @@ import lombok.Data;
  */
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TransfersRequest implements Request {
 
-	private long toCustomerId;
-
 	private long fromCustomerId;
+
+	private long toCustomerId;
 
 	private BigDecimal transferAmount;
 

@@ -7,17 +7,19 @@ import java.math.BigDecimal;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author Dhawal Patel
  *
  */
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class Balance {
 
-	private final BigDecimal amount;
+	private BigDecimal amount;
 
-	private final long version;
+	private long version;
 
 }

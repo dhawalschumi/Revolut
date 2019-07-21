@@ -28,9 +28,19 @@ public class TransfersHandler extends BaseHandler {
 	@Override
 	public void handle(Context ctx) throws Exception {
 		ctx.getRequest().getBody().then(body -> {
-			TransfersRequest request = getRequestFromBody(ctx, body, TransfersRequest.class);
-			TransferService transferService = ctx.get(TransferService.class);
+			TransfersRequest request = null;
 			ObjectMapper mapper = ctx.get(ObjectMapper.class);
+			try {
+				request = getRequestFromBody(ctx, body, TransfersRequest.class);
+			} catch (Exception e) {
+				logError(request, e);
+				ctx.getResponse().status(Status.BAD_REQUEST);
+				request.addError(new ValidationError("Request is not a json or it does not suffice data type criterua",
+						"BadFormat"));
+				ctx.render(mapper.writeValueAsString(request));
+				throw e;
+			}
+			TransferService transferService = ctx.get(TransferService.class);
 			try {
 				List<ValidationError> errors = validate(request);
 				if (!CollectionUtils.isEmpty(errors)) {
@@ -56,7 +66,6 @@ public class TransfersHandler extends BaseHandler {
 				ctx.getResponse().status(Status.BAD_REQUEST);
 				ctx.render(mapper.writeValueAsString(request));
 			} catch (Exception e) {
-				logError(request, e);
 				request.addError(new ValidationError("Unknown Error", "Unknown"));
 				ctx.getResponse().status(Status.INTERNAL_SERVER_ERROR);
 				ctx.render(mapper.writeValueAsString(request));

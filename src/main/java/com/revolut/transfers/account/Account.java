@@ -1,14 +1,16 @@
 package com.revolut.transfers.account;
 
 import lombok.AllArgsConstructor;
-import lombok.Value;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
-@Value
+@NoArgsConstructor
+@Data
 public class Account {
 
-	private final long accountId;
+	private long accountId;
 
-	private final Balance accountBalance;
+	private Balance accountBalance;
 
 }
