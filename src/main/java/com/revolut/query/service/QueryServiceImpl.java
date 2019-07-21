@@ -91,25 +91,20 @@ public class QueryServiceImpl implements QueryService {
 	@Override
 	public void updateAccountBalance(final Account fromAccount, final Account toAccount, final BigDecimal amount)
 			throws Exception {
-		PreparedStatement fromAccountStatement = null;
-		PreparedStatement toAccountStatement = null;
+		PreparedStatement statement = null;
 		Connection connection = null;
 		try {
 			connection = databaseManager.getConnection();
 			connection.setAutoCommit(false);
-			fromAccountStatement = getAccountUpdatePreparedStatement(fromAccount,
-					fromAccount.getAccountBalance().getAmount().subtract(amount), connection);
-			boolean isFromAccountUpdateSuccessful = fromAccountStatement.executeUpdate() == 1 ? true : false;
-			if (!isFromAccountUpdateSuccessful) {
-				throw new ConcurrentUpdateException("Fund Transfer Failed due to fromAccount balance version mismatch");
+			statement = getTransferPreparedStatement(fromAccount, toAccount, amount, connection);
+			int[] updateResult = statement.executeBatch();
+			if (1 == updateResult[0] && 1 == updateResult[1]) {
+				connection.commit();
+				log.info("Fund Transfer from Account {} to Account {} is successful", fromAccount.getAccountId(),
+						toAccount.getAccountId());
+			} else {
+				throw new ConcurrentUpdateException("Fund Transfer Failed due to version mismatch");
 			}
-			toAccountStatement = getAccountUpdatePreparedStatement(toAccount,
-					toAccount.getAccountBalance().getAmount().add(amount), connection);
-			boolean isToAccountUpdateSuccessful = toAccountStatement.executeUpdate() == 1 ? true : false;
-			if (!isToAccountUpdateSuccessful) {
-				throw new ConcurrentUpdateException("Fund Transfer Failed due to toAccount balance version mismatch");
-			}
-			connection.commit();
 			log.info("Fund Transfer from Account {} to Account {} is successful", fromAccount.getAccountId(),
 					toAccount.getAccountId());
 		} catch (Exception e) {
@@ -118,18 +113,24 @@ public class QueryServiceImpl implements QueryService {
 			connection.rollback();
 			throw e;
 		} finally {
-			cleanup(fromAccountStatement, connection);
+			cleanup(statement, connection);
 		}
 	}
 
-	private PreparedStatement getAccountUpdatePreparedStatement(final Account account, final BigDecimal amount,
-			Connection connection) throws SQLException {
+	private PreparedStatement getTransferPreparedStatement(final Account fromAccount, final Account toAccount,
+			final BigDecimal amount, Connection connection) throws SQLException {
 		PreparedStatement statement = connection
 				.prepareStatement("update balance set amount = ? , version = ? where account_id = ? and version = ?");
-		statement.setBigDecimal(1, amount);
-		statement.setLong(2, account.getAccountBalance().getVersion() + 1);
-		statement.setLong(3, account.getAccountId());
-		statement.setLong(4, account.getAccountBalance().getVersion());
+		statement.setBigDecimal(1, fromAccount.getAccountBalance().getAmount().subtract(amount));
+		statement.setLong(2, fromAccount.getAccountBalance().getVersion() + 1);
+		statement.setLong(3, fromAccount.getAccountId());
+		statement.setLong(4, fromAccount.getAccountBalance().getVersion());
+		statement.addBatch();
+		statement.setBigDecimal(1, toAccount.getAccountBalance().getAmount().add(amount));
+		statement.setLong(2, toAccount.getAccountBalance().getVersion() + 1);
+		statement.setLong(3, toAccount.getAccountId());
+		statement.setLong(4, toAccount.getAccountBalance().getVersion());
+		statement.addBatch();
 		return statement;
 	}
 
