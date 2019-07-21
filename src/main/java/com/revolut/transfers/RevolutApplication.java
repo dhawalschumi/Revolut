@@ -17,7 +17,6 @@ import com.revolut.transfers.service.TransferService;
 import com.revolut.transfers.service.TransferServiceImpl;
 
 import ratpack.func.Action;
-import ratpack.registry.NotInRegistryException;
 import ratpack.server.RatpackServer;
 import ratpack.server.RatpackServerSpec;
 
@@ -30,6 +29,11 @@ public class RevolutApplication {
 
 	public static void main(String[] args) {
 		Action<RatpackServerSpec> serverSpec = (server) -> {
+			server.serverConfig(builder -> {
+				builder.development(false);
+				builder.threads(200);
+				builder.build();
+			});
 			server.registryOf(registry -> {
 				DatabaseManager databaseManager = new DatabaseManagerImpl();
 				QueryService queryService = new QueryServiceImpl(databaseManager);
@@ -45,17 +49,7 @@ public class RevolutApplication {
 			}).handlers(chain -> chain.post("transfer", TransfersHandler.class));
 		};
 		try {
-			RatpackServer server = RatpackServer.start(serverSpec);
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				try {
-					System.out.println("Stopping Database");
-					server.getRegistry().get().get(DatabaseManager.class).shutDownDB();
-				} catch (NotInRegistryException e) {
-					e.printStackTrace(System.out);
-				} catch (Exception e) {
-					e.printStackTrace(System.out);
-				}
-			}));
+			RatpackServer.start(serverSpec);
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		}
