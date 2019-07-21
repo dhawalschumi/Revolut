@@ -2,7 +2,7 @@
 
 
 ## Design 
-[[https://github.com/dhawalschumi/Revolut/blob/master/Revolut.jpg|alt=Revolut Money Transfers]]
+[https://github.com/dhawalschumi/Revolut/blob/master/Revolut.jpg|alt=Revolut Money Transfers]
 
 ### Technology / Libraries 
 
