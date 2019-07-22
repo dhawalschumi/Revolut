@@ -33,6 +33,7 @@ public class RevolutApplication {
 			server.serverConfig(builder -> {
 				builder.development(false);
 				builder.threads(200);
+				builder.registerShutdownHook(true);
 				builder.build();
 			});
 			server.registryOf(registry -> {
@@ -52,7 +53,15 @@ public class RevolutApplication {
 					AccountDetailsHandler.class));
 		};
 		try {
-			RatpackServer.start(serverSpec);
+			RatpackServer server = RatpackServer.start(serverSpec);
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+				try {
+					System.out.println("Shutting Down DB");
+					server.getRegistry().get().get(DatabaseManager.class).shutDownDB();
+				} catch (Exception e) {
+					e.printStackTrace(System.out);
+				}
+			}));
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
 		}
