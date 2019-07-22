@@ -56,7 +56,6 @@ public class RevolutApplication {
 			RatpackServer server = RatpackServer.start(serverSpec);
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				try {
-					System.out.println("Shutting Down DB");
 					server.getRegistry().get().get(DatabaseManager.class).shutDownDB();
 				} catch (Exception e) {
 					e.printStackTrace(System.out);
